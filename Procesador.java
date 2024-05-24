@@ -42,4 +42,8 @@ public class Procesador {
         this.anio_funcionamiento = anio_funcionamiento;
     }
 
+    public String toString() {
+        return "ID: " + this.getId_procesador();
+    }
+
 }

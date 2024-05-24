@@ -54,6 +54,6 @@ public class Tarea {
 
     @Override
     public String toString() {
-        return "Id tarea: " + id_tarea + " - Nombre tarea: " + nombre_tarea;
+        return "ID: " + id_tarea;
     }
 }
