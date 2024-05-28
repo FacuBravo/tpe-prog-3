@@ -14,8 +14,7 @@ public class Servicios {
 	private Hashtable<String, Tarea> tareas;
 	private Hashtable<String, Procesador> procesadores;
 	private Hashtable<Boolean, ArrayList<Tarea>> tareasByCritica;
-	private Hashtable<Procesador, ArrayList<Tarea>> solucionOptima;
-	private int tiempoMax;
+
 
 	/*
 	 * Expresar la complejidad temporal del constructor.
@@ -28,7 +27,6 @@ public class Servicios {
 		this.tareas = new Hashtable<>();
 		this.procesadores = new Hashtable<>();
 		this.tareasByCritica = new Hashtable<>();
-		this.solucionOptima = new Hashtable<>();
 
 		CSVReader reader = new CSVReader();
 		reader.readProcessors(pathProcesadores, procesadores);
@@ -99,112 +97,14 @@ public class Servicios {
 		return result;
 	}
 
-	// PARTE 2
-
-	public Hashtable<Procesador, ArrayList<Tarea>> asignarTareas(int tiempoMax) {
-		this.tiempoMax = tiempoMax;
-
-		ArrayList<Procesador> procesadoresArr = new ArrayList<>();
-		ArrayList<Tarea> tareasArr = new ArrayList<>();
-
-		procesadoresArr.addAll(this.procesadores.values());
-		tareasArr.addAll(this.tareas.values());
-
-		this.asignarTareas(procesadoresArr, tareasArr, solucionOptima, 0);
-
-		return this.solucionOptima;
+	public ArrayList<Procesador> getProcesadores () {
+        return new ArrayList<>(this.procesadores.values());
 	}
 
-	private void asignarTareas(ArrayList<Procesador> procesadoresArr, ArrayList<Tarea> tareasArr, Hashtable<Procesador, ArrayList<Tarea>> solucion, int indice) {
-		if (indice == tareasArr.size()) {
-			Hashtable<Procesador, ArrayList<Tarea>> aux = new Hashtable<>();
-
-			for (Procesador p : solucion.keySet()) {
-				aux.put(p, new ArrayList<>(solucion.get(p)));
-			}
-
-			int minTiempo = this.getTiempoFinalEjecucion(this.solucionOptima);
-			int tiempo = this.getTiempoFinalEjecucion(aux);
-
-			if (minTiempo == 0) {
-				this.solucionOptima = aux;
-				minTiempo = tiempo;
-			}
-
-			else {
-				if (tiempo <= minTiempo) {
-					this.solucionOptima = aux;
-					minTiempo = tiempo;
-				}
-			}
-
-			return;
-		}
-
-		Tarea tarea = tareasArr.get(indice);
-
-		for (Procesador procesador : procesadoresArr) {
-			if (!solucion.containsKey(procesador)) {
-				solucion.put(procesador, new ArrayList<>());
-			}
-
-			if (this.esApto(solucion.get(procesador), tarea, procesador)) {
-				solucion.get(procesador).add(tarea);
-
-				this.asignarTareas(procesadoresArr, tareasArr, solucion, indice + 1);
-
-				solucion.get(procesador).remove(tarea);
-			}
-		}
+	public ArrayList<Tarea> getTareas () {
+		return new ArrayList<>(this.tareas.values());
 	}
 
-	private int getTiempoFinalEjecucion(Hashtable<Procesador, ArrayList<Tarea>> procesamientos) {
-		int tiempoFinal = 0, tiempoActual = 0;
 
-		for (ArrayList<Tarea> tareas : procesamientos.values()) {
-			for (Tarea t : tareas) {
-				tiempoActual += t.getTiempo_ejecucion();
-			}
 
-			if (tiempoFinal < tiempoActual) {
-				tiempoFinal = tiempoActual;
-			}
-
-			tiempoActual = 0;
-		}
-
-		return tiempoFinal;
-	}
-
-	private boolean esApto(ArrayList<Tarea> tareas, Tarea t, Procesador p) {
-		boolean esApto = false;
-
-		if (!tareas.isEmpty()) {
-			Tarea ultimaTarea = tareas.get(tareas.size() - 1);
-
-			if (!(ultimaTarea.getEs_critica() && t.getEs_critica())) {
-				esApto = true;
-			}
-		} else {
-			esApto = true;
-		}
-
-		if (esApto) {
-			if (p.isEsta_refrigerado()) {
-				int tiempo = 0;
-
-				for (Tarea tarea : tareas) {
-					tiempo += tarea.getTiempo_ejecucion();
-				}
-
-				tiempo += t.getTiempo_ejecucion();
-
-				if (tiempo > tiempoMax) {
-					esApto = false;
-				}
-			}
-		}
-
-		return esApto;
-	}
 }

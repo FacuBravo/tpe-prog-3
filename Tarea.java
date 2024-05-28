@@ -4,11 +4,11 @@ public class Tarea {
 
     private String id_tarea;
     private String nombre_tarea;
-    private double tiempo_ejecucion;
+    private int tiempo_ejecucion;
     private boolean es_critica;
     private int nivel_prioridad;
 
-    public Tarea(String id_tarea, String nombre_tarea, double tiempo_ejecucion, boolean es_critica, int nivel_prioridad) {
+    public Tarea(String id_tarea, String nombre_tarea, int tiempo_ejecucion, boolean es_critica, int nivel_prioridad) {
         this.id_tarea = id_tarea;
         this.nombre_tarea = nombre_tarea;
         this.tiempo_ejecucion = tiempo_ejecucion;
@@ -24,7 +24,7 @@ public class Tarea {
         return nombre_tarea;
     }
 
-    public double getTiempo_ejecucion() {
+    public int getTiempo_ejecucion() {
         return tiempo_ejecucion;
     }
 
@@ -40,7 +40,7 @@ public class Tarea {
         this.nombre_tarea = nombre_tarea;
     }
 
-    public void setTiempo_ejecucion(double tiempo_ejecucion) {
+    public void setTiempo_ejecucion(int tiempo_ejecucion) {
         this.tiempo_ejecucion = tiempo_ejecucion;
     }
 

@@ -1,9 +1,12 @@
 package ProgramacionIII.tpe;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 public class Main {
 
 	public static void main(String args[]) {
-		Servicios servicios = new Servicios("./ProgramacionIII/tpe/datasets/Procesadores.csv", "./ProgramacionIII/tpe/datasets/Tareas.csv");
+		Servicios servicios = new Servicios("C:/Users/Usuario/Desktop/tpe-prog-3/datasets/Procesadores.csv", "C:/Users/Usuario/Desktop/tpe-prog-3/datasets/Tareas.csv");
 
 		// PARTE 1
 
@@ -14,8 +17,19 @@ public class Main {
 		// PARTE 2
 
 		System.out.println();
-		System.out.println();
-		System.out.println(servicios.asignarTareas(60));
+
+
+
+		Backtracking backtracking = new Backtracking(servicios);
+
+		Map<Procesador, ArrayList<Tarea>> tareasAsignadas = backtracking.asignarTareas(60);
+
+		for(Map.Entry<Procesador, ArrayList<Tarea>> entry : tareasAsignadas.entrySet()) {
+			System.out.println(entry.getKey() + ": " + entry.getValue());
+		}
+
+
+
 
 	}
 }
