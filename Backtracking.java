@@ -7,13 +7,14 @@ public class Backtracking {
 
     private Servicios servicios;
     private HashMap<Procesador, ListaTareas> solucionOptima;
-    private int tiempoProcesadoresRefrigerados, tiempoFinal, contadorDeSoluciones;
+    private int tiempoProcesadoresRefrigerados, tiempoFinal, contadorDeSoluciones, cantidadDeEstados;
 
     public Backtracking(Servicios servicios) {
         this.servicios = servicios;
         this.solucionOptima = new HashMap<>();
         this.tiempoFinal = 0;
         this.contadorDeSoluciones = 0;
+        this.cantidadDeEstados = 0;
     }
 
     public HashMap<Procesador, ListaTareas> asignarTareas(int tiempoProcesadoresRefrigerados) {
@@ -30,6 +31,8 @@ public class Backtracking {
     }
 
     private void asignarTareas(ArrayList<Procesador> procesadores, ListaTareas tareas, HashMap<Procesador, ListaTareas> solucion, int indice) {
+
+        this.cantidadDeEstados++;
         if (indice == tareas.size()) {
             this.contadorDeSoluciones++;
             HashMap<Procesador, ListaTareas> aux = new HashMap<>();
@@ -125,5 +128,9 @@ public class Backtracking {
 
     public int getCantSoluciones() {
         return this.contadorDeSoluciones;
+    }
+
+    public int getCantidadDeEstados() {
+        return cantidadDeEstados;
     }
 }
