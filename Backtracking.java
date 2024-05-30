@@ -2,94 +2,92 @@ package ProgramacionIII.tpe;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 public class Backtracking {
 
     private Servicios servicios;
-    private HashMap<Procesador, ArrayList<Tarea>> solucionOptima;
-    private int tiempoMax;
+    private HashMap<Procesador, ListaTareas> solucionOptima;
+    private int tiempoProcesadoresRefrigerados, tiempoFinal, contadorDeSoluciones;
 
     public Backtracking(Servicios servicios) {
         this.servicios = servicios;
         this.solucionOptima = new HashMap<>();
-        this.tiempoMax = Integer.MIN_VALUE;
+        this.tiempoFinal = 0;
+        this.contadorDeSoluciones = 0;
     }
 
-    public HashMap<Procesador, ArrayList<Tarea>> asignarTareas(int tiempoMax) {
-        this.tiempoMax = tiempoMax;
+    public HashMap<Procesador, ListaTareas> asignarTareas(int tiempoProcesadoresRefrigerados) {
+        this.tiempoProcesadoresRefrigerados = tiempoProcesadoresRefrigerados;
 
         ArrayList<Procesador> procesadoresArr = new ArrayList<>(servicios.getProcesadores());
         ArrayList<Tarea> tareasArr = new ArrayList<>(servicios.getTareas());
 
+        ListaTareas listaTareas = new ListaTareas(tareasArr);
 
-        this.asignarTareas(procesadoresArr, tareasArr, solucionOptima, 0);
+        this.asignarTareas(procesadoresArr, listaTareas, solucionOptima, 0);
 
         return this.solucionOptima;
     }
 
-    private void asignarTareas(ArrayList<Procesador> procesadores, ArrayList<Tarea> tareas, HashMap<Procesador, ArrayList<Tarea>> solucion, int indice) {
-
+    private void asignarTareas(ArrayList<Procesador> procesadores, ListaTareas tareas, HashMap<Procesador, ListaTareas> solucion, int indice) {
         if (indice == tareas.size()) {
-            HashMap<Procesador, ArrayList<Tarea>> aux = new HashMap<>();
+            this.contadorDeSoluciones++;
+            HashMap<Procesador, ListaTareas> aux = new HashMap<>();
 
             for (Procesador p : solucion.keySet()) {
-                aux.put(p, new ArrayList<>(solucion.get(p)));
+                aux.put(p, solucion.get(p).getCopia());
             }
 
-            int minTiempo = this.getTiempoFinalEjecucion(this.solucionOptima);
             int tiempo = this.getTiempoFinalEjecucion(aux);
 
-            if (minTiempo == 0) {
+            if (tiempoFinal == 0) {
                 this.solucionOptima = aux;
-                minTiempo = tiempo;
+                tiempoFinal = tiempo;
             }
 
             else {
-                if (tiempo <= minTiempo) {
+                if (tiempo <= tiempoFinal) {
                     this.solucionOptima = aux;
-                    minTiempo = tiempo;
+                    tiempoFinal = tiempo;
                 }
             }
-            return;
-        }
 
-        Tarea tarea = tareas.get(indice);
+        } else {
+            Tarea tarea = tareas.get(indice);
 
-        for (Procesador procesador : procesadores) {
-            if (!solucion.containsKey(procesador)) {
-                solucion.put(procesador, new ArrayList<>());
-            }
+            for (Procesador procesador : procesadores) {
+                if (!solucion.containsKey(procesador)) {
+                    solucion.put(procesador, new ListaTareas());
+                }
 
-            if (this.esApto(solucion.get(procesador), tarea, procesador)) {
-                solucion.get(procesador).add(tarea);
+                if (this.esApto(solucion.get(procesador), tarea, procesador)) {
+                    solucion.get(procesador).add(tarea);
 
-                this.asignarTareas(procesadores, tareas, solucion, indice + 1);
+                    if (solucion.get(procesador).getTiempoEjecucion() < this.tiempoFinal || this.tiempoFinal == 0) {
+                        this.asignarTareas(procesadores, tareas, solucion, indice + 1);
+                    }
 
-                solucion.get(procesador).remove(tarea);
+                    solucion.get(procesador).remove(tarea);
+                }
             }
         }
     }
 
-    private int getTiempoFinalEjecucion(HashMap<Procesador, ArrayList<Tarea>> procesamientos) {
-        int tiempoFinal = 0, tiempoActual = 0;
+    private int getTiempoFinalEjecucion(HashMap<Procesador, ListaTareas> procesamientos) {
+        int tiempoFinal = 0;
 
-        for (ArrayList<Tarea> tareas : procesamientos.values()) {
-            for (Tarea t : tareas) {
-                tiempoActual += t.getTiempo_ejecucion();
+        for (Procesador p : procesamientos.keySet()) {
+            int tiempoEjecucion = procesamientos.get(p).getTiempoEjecucion();
+
+            if (tiempoEjecucion > tiempoFinal || tiempoFinal == 0) {
+                tiempoFinal = tiempoEjecucion;
             }
-
-            if (tiempoFinal < tiempoActual) {
-                tiempoFinal = tiempoActual;
-            }
-
-            tiempoActual = 0;
         }
 
         return tiempoFinal;
     }
 
-    private boolean esApto(ArrayList<Tarea> tareas, Tarea t, Procesador p) {
+    private boolean esApto(ListaTareas tareas, Tarea t, Procesador p) {
         boolean esApto = false;
 
         if (!tareas.isEmpty()) {
@@ -112,7 +110,7 @@ public class Backtracking {
 
                 tiempo += t.getTiempo_ejecucion();
 
-                if (tiempo > tiempoMax) {
+                if (tiempo > this.tiempoProcesadoresRefrigerados) {
                     esApto = false;
                 }
             }
@@ -121,5 +119,11 @@ public class Backtracking {
         return esApto;
     }
 
+    public int getTiempoFinal() {
+        return this.tiempoFinal;
+    }
 
+    public int getCantSoluciones() {
+        return this.contadorDeSoluciones;
+    }
 }
