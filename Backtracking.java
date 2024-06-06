@@ -7,21 +7,21 @@ public class Backtracking {
 
     private Servicios servicios;
     private HashMap<Procesador, ListaTareas> solucionOptima;
-    private int tiempoProcesadoresRefrigerados, tiempoFinal, contadorDeSoluciones, cantidadDeEstados;
+    private int tiempoProcesadoresRefrigerados, tiempoFinal, cantidadDeEstados;
 
     public Backtracking(Servicios servicios) {
         this.servicios = servicios;
         this.solucionOptima = new HashMap<>();
         this.tiempoFinal = 0;
-        this.contadorDeSoluciones = 0;
         this.cantidadDeEstados = 0;
     }
 
     /**
      * <Breve explicación de la estrategia de resolución>
-     * El algoritmo backtracking trata de asignar tareas a los procesadores de manera que se minimice el tiempo total de ejecución.
+     * El algoritmo backtracking prueba todas las combinaciones posibles de asignacion de tareas a procesadores,
+     * teniendo en cuenta las restricciones de la consigna.
      * Si una asignación parcial no cumple con las condiciones requeridas (por ejemplo, el tiempo de ejecución supera el
-     * límite permitido para procesadores refrigerados), se retrocede (backtrack) y se intenta con otra asignación.
+     * límite permitido para procesadores refrigerados), se retrocede y se intenta con otra asignación.
      * */
 
     public HashMap<Procesador, ListaTareas> asignarTareas(int tiempoProcesadoresRefrigerados) {
@@ -40,8 +40,8 @@ public class Backtracking {
     private void asignarTareas(ArrayList<Procesador> procesadores, ListaTareas tareas, HashMap<Procesador, ListaTareas> solucion, int indice) {
 
         this.cantidadDeEstados++;
+
         if (indice == tareas.size()) {
-            this.contadorDeSoluciones++;
             HashMap<Procesador, ListaTareas> aux = new HashMap<>();
 
             for (Procesador p : solucion.keySet()) {
@@ -131,10 +131,6 @@ public class Backtracking {
 
     public int getTiempoFinal() {
         return this.tiempoFinal;
-    }
-
-    public int getCantSoluciones() {
-        return this.contadorDeSoluciones;
     }
 
     public int getCantidadDeEstados() {

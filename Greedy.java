@@ -61,14 +61,16 @@ public class Greedy {
             }
         }
 
-        this.solucionOptima = solucionGreedy;  // Guardar la solución óptima
+        this.solucionOptima = solucionGreedy;
         return solucionGreedy;
     }
     private int getTiempoEjecucion(ListaTareas tareas) {
         int tiempoFinal = 0;
+
         for (Tarea t : tareas) {
             tiempoFinal += t.getTiempo_ejecucion();
         }
+
         return tiempoFinal;
     }
 
