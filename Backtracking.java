@@ -17,6 +17,13 @@ public class Backtracking {
         this.cantidadDeEstados = 0;
     }
 
+    /**
+     * <Breve explicación de la estrategia de resolución>
+     * El algoritmo backtracking trata de asignar tareas a los procesadores de manera que se minimice el tiempo total de ejecución.
+     * Si una asignación parcial no cumple con las condiciones requeridas (por ejemplo, el tiempo de ejecución supera el
+     * límite permitido para procesadores refrigerados), se retrocede (backtrack) y se intenta con otra asignación.
+     * */
+
     public HashMap<Procesador, ListaTareas> asignarTareas(int tiempoProcesadoresRefrigerados) {
         this.tiempoProcesadoresRefrigerados = tiempoProcesadoresRefrigerados;
 

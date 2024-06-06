@@ -11,13 +11,17 @@ public class Greedy {
     private HashMap<Procesador, ListaTareas> solucionOptima;
     private int contadorDeCandidatos;
 
-
-
     public Greedy(Servicios servicios) {
         this.servicios = servicios;
         this.solucionOptima = new HashMap<>();
         this.contadorDeCandidatos = 0;
     }
+
+    /**
+     * <Breve explicación de la estrategia de resolución>
+     * En el algoritmo greedy se intenta asignar cada tarea al procesador que aumentará lo menos posible el tiempo total de ejecución,
+     * basándose en la ordenación de las tareas por su tiempo de ejecución.
+     * */
 
     public HashMap<Procesador, ListaTareas> asignarTareas(int tiempoProcesadoresRefrigerados) {
 
