@@ -12,8 +12,6 @@ public class Main {
 		System.out.println(servicios.servicio2(true));
 		System.out.println(servicios.servicio3(30,70));
 
-		
-
 		// PARTE 2
 
 		/*****************    BACKTRACKING    **************************/
@@ -21,7 +19,7 @@ public class Main {
 		Backtracking backtracking = new Backtracking(servicios);
 
 		System.out.println("Backtracking");
-		HashMap<Procesador, ListaTareas> tareasAsignadasBacktracking = backtracking.asignarTareas(60);
+		HashMap<Procesador, ListaTareas> tareasAsignadasBacktracking = backtracking.asignarTareas(10);
 
 		for (HashMap.Entry<Procesador, ListaTareas> entry : tareasAsignadasBacktracking.entrySet()) {
 			System.out.println(entry.getKey() + ": " + entry.getValue());
@@ -31,12 +29,11 @@ public class Main {
 		System.out.println("Cantidad de estados generados: " + backtracking.getCantidadDeEstados());
 
 
-
 		/*****************    GREEDY    **************************/
 
 		Greedy greedy = new Greedy(servicios);
 
-		HashMap<Procesador, ListaTareas> tareasAsignadasGreedy = greedy.asignarTareas(60);
+		HashMap<Procesador, ListaTareas> tareasAsignadasGreedy = greedy.asignarTareas(10);
 
 		System.out.println();
 		System.out.println("Greedy");
@@ -47,5 +44,6 @@ public class Main {
 
 		System.out.println("Tiempo máximo de ejecución: " + greedy.getTiempoFinal());
 		System.out.println("Cantidad de candidatos considerados: " + greedy.getCantCandidatos());
+
 	}
 }

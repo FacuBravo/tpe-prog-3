@@ -43,7 +43,7 @@ public class Procesador {
     }
 
     public String toString() {
-        return "ID: " + this.getId_procesador();
+        return this.getId_procesador();
     }
 
 }

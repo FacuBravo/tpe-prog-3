@@ -1,88 +1,144 @@
 package ProgramacionIII.tpe;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class Greedy {
-
     private Servicios servicios;
     private HashMap<Procesador, ListaTareas> solucionOptima;
-    private int contadorDeCandidatos;
+    private ArrayList<Tarea> tareasArr;
+    private ArrayList<Procesador> procesadoresArr;
+    private int contadorDeCandidatos, tiempoProcesadoresRefrigerados, tiempoFinal;
 
     public Greedy(Servicios servicios) {
         this.servicios = servicios;
         this.solucionOptima = new HashMap<>();
         this.contadorDeCandidatos = 0;
+        this.tiempoFinal = 0;
+        this.cargarDatos();
     }
 
-    /**
-     * <Breve explicación de la estrategia de resolución>
-     * En el algoritmo greedy se intenta asignar cada tarea al procesador que aumentará lo menos posible el tiempo total de ejecución,
-     * basándose en la ordenación de las tareas por su tiempo de ejecución.
-     * */
+    /*
+     * 
+     * Explicación:
+     * 
+     * Para el algoritmo greedy seleccionamos del arreglo de tareas la que menor
+     * tiempo de ejecución tenga, una vez seleccionada se elige el mejor procesador
+     * que sea apto para ejecutar esa tarea (una tarea es apta para un procesador
+     * si al asignarla no se rompe con ninguna restricción), el mejor procesador
+     * será aquel que tenga el menor tiempo de ejecución de la suma de las tareas que
+     * tiene asignadas.
+     * Cuándo se seleccionó la mejor tarea y el mejor procesador, se asigna la tarea
+     * elegida al procesador correspondiente.
+     * 
+     */
 
     public HashMap<Procesador, ListaTareas> asignarTareas(int tiempoProcesadoresRefrigerados) {
+        this.tiempoProcesadoresRefrigerados = tiempoProcesadoresRefrigerados;
 
-        ArrayList<Procesador> procesadoresArr = new ArrayList<>(servicios.getProcesadores());
-        ArrayList<Tarea> tareasArr = new ArrayList<>(servicios.getTareas());
+        HashMap<Procesador, ListaTareas> solucionParcial = new HashMap<>();
+        ArrayList<Tarea> tareasAux = new ArrayList<>();
 
-        Collections.sort(tareasArr, new Comparator<Tarea>() {
-            @Override
-            public int compare(Tarea t1, Tarea t2) {
-                return Integer.compare(t1.getTiempo_ejecucion(), t2.getTiempo_ejecucion());
-            }
-        });
-
-        HashMap<Procesador, ListaTareas> solucionGreedy = new HashMap<>();
-        for (Procesador procesador : procesadoresArr) {
-            solucionGreedy.put(procesador, new ListaTareas());
+        for (Tarea t : this.tareasArr) {
+            tareasAux.add(t);
         }
 
-        for (Tarea tarea : tareasArr) {
-            Procesador mejorProcesador = null;
-            int menorTiempo = Integer.MAX_VALUE;
+        for (Procesador p : this.procesadoresArr) {
+            solucionParcial.put(p, new ListaTareas());
+        }
 
-            for (Procesador procesador : procesadoresArr) {
+        this.greedy(tareasAux, solucionParcial);
 
-                this.contadorDeCandidatos++;
-                if (this.esApto(solucionGreedy.get(procesador), tarea, procesador, tiempoProcesadoresRefrigerados)) {
-                    int tiempoActual = this.getTiempoEjecucion(solucionGreedy.get(procesador)) + tarea.getTiempo_ejecucion();
-                    if (tiempoActual < menorTiempo) {
-                        menorTiempo = tiempoActual;
-                        mejorProcesador = procesador;
-                    }
+        return this.solucionOptima;
+    }
+
+    private void greedy(ArrayList<Tarea> tareas, HashMap<Procesador, ListaTareas> solucionParcial) {
+        while (!tareas.isEmpty()) {
+            Tarea t = this.seleccionarMejorTarea(tareas);
+            Procesador p = this.getMejorProcesador(solucionParcial, t);
+
+            if (p == null) {
+                return;
+            }
+
+            this.contadorDeCandidatos++;
+            tareas.remove(t);
+            solucionParcial.get(p).add(t);
+        }
+
+        this.solucionOptima = solucionParcial;
+        this.tiempoFinal = this.getTiempoFinalEjecucion(this.solucionOptima);
+    }
+
+    private Procesador getMejorProcesador(HashMap<Procesador, ListaTareas> solucionParcial, Tarea t) {
+        Procesador mejorProcesador = null;
+
+        Iterator<Procesador> it = solucionParcial.keySet().iterator();
+
+        while (it.hasNext()) {
+            Procesador procesador = it.next();
+
+            if (mejorProcesador == null) {
+                if (this.esApto(solucionParcial.get(procesador), t, procesador)) {
+                    mejorProcesador = procesador;
                 }
             }
 
-            if (mejorProcesador != null) {
-                solucionGreedy.get(mejorProcesador).add(tarea);
+            else if (solucionParcial.get(mejorProcesador).getTiempoEjecucion() > solucionParcial.get(procesador).getTiempoEjecucion()) {
+                if (this.esApto(solucionParcial.get(procesador), t, procesador)) {
+                    mejorProcesador = procesador;
+                }
             }
         }
 
-        this.solucionOptima = solucionGreedy;
-        return solucionGreedy;
+        return mejorProcesador;
     }
-    private int getTiempoEjecucion(ListaTareas tareas) {
-        int tiempoFinal = 0;
 
-        for (Tarea t : tareas) {
-            tiempoFinal += t.getTiempo_ejecucion();
+    private Tarea seleccionarMejorTarea(ArrayList<Tarea> tareas) {
+        Tarea t = null;
+
+        for (Tarea tarea : tareas) {
+            if (t == null) {
+                t = tarea;
+            }
+
+            else if (tarea.getTiempo_ejecucion() < t.getTiempo_ejecucion()) {
+                t = tarea;
+            }
         }
 
-        return tiempoFinal;
+        return t;
     }
 
-    private boolean esApto(ListaTareas tareas, Tarea t, Procesador p, int tiempoProcesadoresRefrigerados) {
+    private int getTiempoFinalEjecucion(HashMap<Procesador, ListaTareas> procesamientos) {
+        int tiempo = 0;
+
+        for (Procesador p : procesamientos.keySet()) {
+            int tiempoActual = procesamientos.get(p).getTiempoEjecucion();
+
+            if (tiempoActual > tiempo || tiempo == 0) {
+                tiempo = tiempoActual;
+            }
+        }
+
+        return tiempo;
+    }
+
+    private boolean esApto(ListaTareas tareas, Tarea t, Procesador p) {
         boolean esApto = false;
 
         if (!tareas.isEmpty()) {
-            Tarea ultimaTarea = tareas.get(tareas.size() - 1);
+            int cuentaTareasCriticas = 0;
 
-            if (!(ultimaTarea.getEs_critica() && t.getEs_critica())) {
-                esApto = true;
+            for (Tarea tarea : tareas) {
+                if (tarea.getEs_critica()) {
+                    cuentaTareasCriticas++;
+                }
             }
+
+            esApto = cuentaTareasCriticas < 2;
+
         } else {
             esApto = true;
         }
@@ -97,7 +153,7 @@ public class Greedy {
 
                 tiempo += t.getTiempo_ejecucion();
 
-                if (tiempo > tiempoProcesadoresRefrigerados) {
+                if (tiempo > this.tiempoProcesadoresRefrigerados) {
                     esApto = false;
                 }
             }
@@ -106,25 +162,16 @@ public class Greedy {
         return esApto;
     }
 
-    private int getTiempoFinal(HashMap<Procesador, ListaTareas> procesamientos) {
-        int tiempoFinal = 0;
-
-        for (Procesador p : procesamientos.keySet()) {
-            int tiempoEjecucion = procesamientos.get(p).getTiempoEjecucion();
-
-            if (tiempoEjecucion > tiempoFinal || tiempoFinal == 0) {
-                tiempoFinal = tiempoEjecucion;
-            }
-        }
-
-        return tiempoFinal;
-    }
-
-    public int getTiempoFinal(){
-        return getTiempoFinal(this.solucionOptima);
+    private void cargarDatos() {
+        this.procesadoresArr = new ArrayList<>(servicios.getProcesadores());
+        this.tareasArr = new ArrayList<>(servicios.getTareas());
     }
 
     public int getCantCandidatos() {
-        return contadorDeCandidatos;
+        return this.contadorDeCandidatos;
+    }
+
+    public int getTiempoFinal() {
+        return this.tiempoFinal;
     }
 }

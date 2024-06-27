@@ -54,6 +54,6 @@ public class Tarea {
 
     @Override
     public String toString() {
-        return "ID: " + id_tarea;
+        return this.getId_tarea();
     }
 }

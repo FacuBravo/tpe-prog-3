@@ -2,110 +2,142 @@ package ProgramacionIII.tpe;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class Backtracking {
 
     private Servicios servicios;
     private HashMap<Procesador, ListaTareas> solucionOptima;
+    private ArrayList<Tarea> tareasArr;
+    private ArrayList<Procesador> procesadoresArr;
     private int tiempoProcesadoresRefrigerados, tiempoFinal, cantidadDeEstados;
 
     public Backtracking(Servicios servicios) {
         this.servicios = servicios;
         this.solucionOptima = new HashMap<>();
-        this.tiempoFinal = 0;
         this.cantidadDeEstados = 0;
+        this.tiempoFinal = 0;
+        this.cargarDatos();
     }
 
-    /**
-     * <Breve explicación de la estrategia de resolución>
-     * El algoritmo backtracking prueba todas las combinaciones posibles de asignacion de tareas a procesadores,
-     * teniendo en cuenta las restricciones de la consigna.
-     * Si una asignación parcial no cumple con las condiciones requeridas (por ejemplo, el tiempo de ejecución supera el
-     * límite permitido para procesadores refrigerados), se retrocede y se intenta con otra asignación.
-     * */
+    /*
+     * 
+     * Explicación:
+     * 
+     * Para encontrar todas las soluciones posibles y así elegir la mejor
+     * recorremos cada procesador, si el procesador no está en la solución actual
+     * lo cargamos en el HashMap con un value de una lista de tareas vacía,
+     * luego se obtiene la primer tarea del arreglo de tareas y se la asigna al
+     * procesador ya seleccionado si es apto (una tarea es apta para un procesador
+     * si al asignarla no se rompe con ninguna restricción).
+     * El proceso se repite hasta que no quedan tareas (solución encontrada),
+     * si el tiempo de ejecución de la mejor solución es 0 o es mayor que el tiempo
+     * de ejecución de la solución encontrada, la mejor solución pasa a ser la 
+     * solución actual.
+     * En el proceso se realiza una poda, si la solución que se va armando supera 
+     * el mejor tiempo obtenido hasta el momento entonces no se llama recursivamente
+     * y se deshace lo hecho.
+     * 
+     */
 
     public HashMap<Procesador, ListaTareas> asignarTareas(int tiempoProcesadoresRefrigerados) {
         this.tiempoProcesadoresRefrigerados = tiempoProcesadoresRefrigerados;
+        
+        ArrayList<Procesador> procesadoresAux = new ArrayList<>();
+        ArrayList<Tarea> tareasAux = new ArrayList<>();
 
-        ArrayList<Procesador> procesadoresArr = new ArrayList<>(servicios.getProcesadores());
-        ArrayList<Tarea> tareasArr = new ArrayList<>(servicios.getTareas());
+        for (Tarea t : this.tareasArr) {
+            tareasAux.add(t);
+        }
 
-        ListaTareas listaTareas = new ListaTareas(tareasArr);
+        for (Procesador p : this.procesadoresArr) {
+            procesadoresAux.add(p);
+        }
 
-        this.asignarTareas(procesadoresArr, listaTareas, solucionOptima, 0);
+        HashMap<Procesador, ListaTareas> solucionParcial = new HashMap<>();
+
+        this.backtracking(procesadoresAux, tareasAux, solucionParcial);
 
         return this.solucionOptima;
     }
 
-    private void asignarTareas(ArrayList<Procesador> procesadores, ListaTareas tareas, HashMap<Procesador, ListaTareas> solucion, int indice) {
-
+    private void backtracking(ArrayList<Procesador> procesadores, ArrayList<Tarea> tareas, HashMap<Procesador, ListaTareas> solucionParcial) {
         this.cantidadDeEstados++;
 
-        if (indice == tareas.size()) {
-            HashMap<Procesador, ListaTareas> aux = new HashMap<>();
+        if (tareas.isEmpty()) {
+            int tiempoParcial = this.getTiempoFinalEjecucion(solucionParcial);
 
-            for (Procesador p : solucion.keySet()) {
-                aux.put(p, solucion.get(p).getCopia());
-            }
+            if (this.tiempoFinal == 0 || this.tiempoFinal > tiempoParcial) {
+                this.solucionOptima.clear();
 
-            int tiempo = this.getTiempoFinalEjecucion(aux);
+                Iterator<Procesador> it = solucionParcial.keySet().iterator();
 
-            if (tiempoFinal == 0) {
-                this.solucionOptima = aux;
-                tiempoFinal = tiempo;
-            }
+                while (it.hasNext()) {
+                    Procesador p = it.next();
+                    ListaTareas li = solucionParcial.get(p).getCopia();
 
-            else {
-                if (tiempo <= tiempoFinal) {
-                    this.solucionOptima = aux;
-                    tiempoFinal = tiempo;
-                }
-            }
-
-        } else {
-            Tarea tarea = tareas.get(indice);
-
-            for (Procesador procesador : procesadores) {
-                if (!solucion.containsKey(procesador)) {
-                    solucion.put(procesador, new ListaTareas());
+                    this.solucionOptima.put(p, li);
                 }
 
-                if (this.esApto(solucion.get(procesador), tarea, procesador)) {
-                    solucion.get(procesador).add(tarea);
+                this.tiempoFinal = tiempoParcial;
+            }
+        }
 
-                    if (solucion.get(procesador).getTiempoEjecucion() < this.tiempoFinal || this.tiempoFinal == 0) {
-                        this.asignarTareas(procesadores, tareas, solucion, indice + 1);
+        else {
+            Iterator<Procesador> it = procesadores.iterator();
+
+            while (it.hasNext()) {
+                Procesador p = it.next();
+
+                if (!solucionParcial.containsKey(p)) {
+                    solucionParcial.put(p, new ListaTareas());
+                }
+
+                Tarea t = tareas.get(0);
+
+                if (this.esApto(solucionParcial.get(p), t, p)) {
+                    solucionParcial.get(p).add(t);
+                    tareas.remove(t);
+
+                    if (this.getTiempoFinalEjecucion(solucionParcial) < tiempoFinal || tiempoFinal == 0) {
+                        this.backtracking(procesadores, tareas, solucionParcial);
                     }
 
-                    solucion.get(procesador).remove(tarea);
+                    tareas.add(t);
+                    solucionParcial.get(p).remove(t);
                 }
             }
         }
     }
 
     private int getTiempoFinalEjecucion(HashMap<Procesador, ListaTareas> procesamientos) {
-        int tiempoFinal = 0;
+        int tiempo = 0;
 
         for (Procesador p : procesamientos.keySet()) {
-            int tiempoEjecucion = procesamientos.get(p).getTiempoEjecucion();
+            int tiempoActual = procesamientos.get(p).getTiempoEjecucion();
 
-            if (tiempoEjecucion > tiempoFinal || tiempoFinal == 0) {
-                tiempoFinal = tiempoEjecucion;
+            if (tiempoActual > tiempo || tiempo == 0) {
+                tiempo = tiempoActual;
             }
         }
 
-        return tiempoFinal;
+        return tiempo;
     }
 
     private boolean esApto(ListaTareas tareas, Tarea t, Procesador p) {
         boolean esApto = false;
 
         if (!tareas.isEmpty()) {
-            Tarea ultimaTarea = tareas.get(tareas.size() - 1);
+            int cuentaTareasCriticas = 0;
 
-            if (!(ultimaTarea.getEs_critica() && t.getEs_critica())) {
-                esApto = true;
+            for (Tarea tarea : tareas) {
+                if (tarea.getEs_critica()) {
+                    cuentaTareasCriticas++;
+                }
             }
+
+            esApto = cuentaTareasCriticas < 2;
+
         } else {
             esApto = true;
         }
@@ -136,4 +168,10 @@ public class Backtracking {
     public int getCantidadDeEstados() {
         return cantidadDeEstados;
     }
+
+    private void cargarDatos() {
+        this.procesadoresArr = new ArrayList<>(servicios.getProcesadores());
+        this.tareasArr = new ArrayList<>(servicios.getTareas());
+    }
+
 }

@@ -7,9 +7,12 @@ public class ListaTareas implements Iterable<Tarea> {
     private ArrayList<Tarea> tareas;
     private int tiempoEjecucion;
 
-    public ListaTareas(ArrayList<Tarea> tareas) {
-        this.tareas = tareas;
-        this._getTiempoEjecucion();
+    public ListaTareas(ArrayList<Tarea> tareasArr) {
+        this.tareas = new ArrayList<>(tareasArr);
+
+        for (Tarea tarea : tareasArr) {
+            tiempoEjecucion += tarea.getTiempo_ejecucion();
+        }
     }
 
     public ListaTareas() {
@@ -21,28 +24,18 @@ public class ListaTareas implements Iterable<Tarea> {
         return this.tiempoEjecucion;
     }
 
-    private void _getTiempoEjecucion() {
-        int tiempo = 0;
-
-        for (Tarea tarea : this.tareas) {
-            tiempo += tarea.getTiempo_ejecucion();
-        }
-
-        this.tiempoEjecucion = tiempo;
-    }
-
     public int size() {
         return this.tareas.size();
     }
 
     public ListaTareas getCopia() {
-        ArrayList<Tarea> tareasCopia = new ArrayList<>();
+        ListaTareas tareasCopia = new ListaTareas();
 
         for (Tarea tarea : this.tareas) {
             tareasCopia.add(tarea);
         }
 
-        return new ListaTareas(tareasCopia);
+        return tareasCopia;
     }
 
     public Tarea get(int indice) {
@@ -51,13 +44,13 @@ public class ListaTareas implements Iterable<Tarea> {
 
     public boolean add(Tarea tarea) {
         boolean r = this.tareas.add(tarea);
-        this._getTiempoEjecucion();
+        this.tiempoEjecucion += tarea.getTiempo_ejecucion();
         return r;
     }
 
     public boolean remove(Tarea tarea) {
         boolean r = this.tareas.remove(tarea);
-        this._getTiempoEjecucion();
+        this.tiempoEjecucion -= tarea.getTiempo_ejecucion();
         return r;
     }
 
