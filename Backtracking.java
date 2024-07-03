@@ -143,7 +143,7 @@ public class Backtracking {
         }
 
         if (esApto) {
-            if (p.isEsta_refrigerado()) {
+            if (!p.isEsta_refrigerado()) {
                 int tiempo = 0;
 
                 for (Tarea tarea : tareas) {
